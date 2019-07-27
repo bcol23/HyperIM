@@ -1,0 +1,6 @@
+torch>=1.0.0
+geoopt
+numpy
+scipy
+pandas
+tqdm

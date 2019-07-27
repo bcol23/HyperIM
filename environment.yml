@@ -1,0 +1,13 @@
+name: hyperim
+channels:
+  - anaconda
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.7
+  - pytorch>=1.0.0
+  - geoopt
+  - numpy
+  - scipy
+  - pandas
+  - tqdm
