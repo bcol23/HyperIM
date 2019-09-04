@@ -1,5 +1,3 @@
-# adapated from https://github.com/dalab/hyperbolic_nn
-
 import sys
 sys.path.append('..') 
 
@@ -7,7 +5,6 @@ import torch as th
 import torch.nn as nn
 import geoopt as gt
 
-from params import *
 from util.hyperop import *
 
 
@@ -34,11 +31,12 @@ class hyperDense(nn.Module):
 
 class hyperRNN(nn.Module):
     
-    def __init__(self, input_size, hidden_size):
+    def __init__(self, input_size, hidden_size, default_dtype=th.float64):
         super(hyperRNN, self).__init__()
         
         self.input_size = input_size
         self.hidden_size = hidden_size
+        self.default_dtype = default_dtype
         
         k = (1 / hidden_size)**0.5
         self.w = gt.ManifoldParameter(gt.ManifoldTensor(hidden_size, hidden_size).uniform_(-k, k))
@@ -54,12 +52,12 @@ class hyperRNN(nn.Module):
         return mob_add(Wh_plus_Ux, self.b)
     
     
-    def init_rnn_state(self, batch_size, hidden_size, device=cuda_device):
-        return th.zeros((batch_size, hidden_size), dtype=default_dtype, device=cuda_device)
+    def init_rnn_state(self, batch_size, hidden_size, cuda_device):
+        return th.zeros((batch_size, hidden_size), dtype=self.default_dtype, device=cuda_device)
     
     
     def forward(self, inputs):
-        hidden = self.init_rnn_state(inputs.shape[0], self.hidden_size)
+        hidden = self.init_rnn_state(inputs.shape[0], self.hidden_size, inputs.device)
         outputs = []
         for x in inputs.transpose(0, 1):
             hidden = self.transition(x, hidden)
@@ -114,21 +112,22 @@ class GRUCell(nn.Module):
     
 class hyperGRU(nn.Module):
     
-    def __init__(self, input_size, hidden_size):
+    def __init__(self, input_size, hidden_size, default_dtype=th.float64):
         super(hyperGRU, self).__init__()
         
         self.input_size = input_size
         self.hidden_size = hidden_size
+        self.default_dtype = default_dtype
         
         self.gru_cell = GRUCell(input_size, hidden_size)
     
     
-    def init_gru_state(self, batch_size, hidden_size, device=cuda_device):
-        return th.zeros((batch_size, hidden_size), dtype=default_dtype, device=cuda_device)
+    def init_gru_state(self, batch_size, hidden_size, cuda_device):
+        return th.zeros((batch_size, hidden_size), dtype=self.default_dtype, device=cuda_device)
     
     
     def forward(self, inputs):
-        hidden = self.init_gru_state(inputs.shape[0], self.hidden_size)
+        hidden = self.init_gru_state(inputs.shape[0], self.hidden_size, inputs.device)
         outputs = []
         for x in inputs.transpose(0, 1):
             hidden = self.gru_cell(x, hidden)

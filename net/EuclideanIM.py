@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class EuclideanIM(nn.Module):
     
-    def __init__(self, feature_num, word_embed, label_embed, hidden_size=5, if_gru=False, **kwargs):
+    def __init__(self, feature_num, word_embed, label_embed, hidden_size=5, if_gru=True, **kwargs):
         super().__init__(**kwargs)
         
         self.hidden_size = hidden_size
@@ -23,14 +23,19 @@ class EuclideanIM(nn.Module):
         self.dense_2 = nn.Linear(int(feature_num/2), 1)
     
     
-    def forward(self, x):
+    def forward(self, x, label=None):
         word_embed = self.word_embed(x)
         encode = self.rnn(word_embed)[0]
-
         encode = encode.unsqueeze(dim=2)
-        encode = encode.expand(-1, -1, self.label_embed.shape[0], -1)
         
-        interaction = ((encode - self.label_embed.expand_as(encode))**2).sum(dim=-1)
+        if(label == None):
+            encode = encode.expand(-1, -1, self.label_embed.shape[0], -1)
+            interaction = ((encode - self.label_embed.expand_as(encode))**2).sum(dim=-1)
+            
+        else:
+            encode = encode.expand(-1, -1, len(label), -1)
+            interaction = ((encode - self.label_embed[label].expand_as(encode))**2).sum(dim=-1)
+        
         interaction = interaction.squeeze(dim=-1).transpose(1, 2)
         
         out = F.relu(self.dense_1(interaction))

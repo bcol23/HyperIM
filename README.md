@@ -10,7 +10,6 @@ PyTorch implementation of [Hyperbolic Interaction Model For Hierarchical Multi-L
 - scipy
 - pandas
 - tqdm
-
 ## Instruction
 
 Run HyperIM via
@@ -27,14 +26,6 @@ $ python EuclideanIM.py
 
 Alternatively use the two Jupyter notebooks.
 
-## Parameters
-
-Parameters can be set in `params.py`.
-
-- *d_ball* indicates whether to use a concatenation of vectors in the low-dimensional Poincaré ball for the word and label embeddings. It's only applicable to HyperIM. When the embedding dimension is large, it's recommended to set `d_ball > 1`. And don't use a large `d_ball`.
-
-- *if_gru* indicates whether to use GRU as th word encoder. If set to `False`, RNN is the substitute.
-
 ## Data
 
 *X_train* and *X_test* should be dense *numpy* array with shape (instance_num, word_num), *y_train* and *y_test* should be one-hot sparse *scipy* array with shape (instance_num, label_num). Sample data is provided in `./data/sample/`.
@@ -43,9 +34,9 @@ The multi-label text classification datasets equipped with hierarchically struct
 
 ## Pre-trained embeddings
 
-Word embeddings can be trained following [Poincaré GloVe](https://github.com/alex-tifrea/poincare_glove). Pre-trained word embeddings should have shape (vocab_size, embed_dim).
+Hyperbolic word embeddings can be trained following [Poincaré GloVe](https://github.com/alex-tifrea/poincare_glove). Pre-trained word embeddings should have shape (vocab_size, embed_dim).
 
-The label hierarchy can be embedded using the [gensim](https://radimrehurek.com/gensim/) implementation of the [Poincaré embeddings](https://github.com/facebookresearch/poincare-embeddings), specified in [Train and use Poincaré embeddings](https://radimrehurek.com/gensim/models/poincare.html). Label embeddings should have shape (label_num, embed_dim). Note that the index of labels should be consistent in *y_train*, *y_test* and label embeddings.
+The label hierarchy can be embedded using the [gensim](https://radimrehurek.com/gensim/) implementation of the [Poincaré embeddings](https://github.com/facebookresearch/poincare-embeddings), specified in [Train and use Poincaré embeddings](https://radimrehurek.com/gensim/models/poincare.html). Label embeddings should have shape (label_num, embed_dim). Note that the index of labels in the label embeddings should be consistent with *y_train* and *y_test*.
 
 Use them accordingly in `HyperIM.py` and `EuclideanIM.py`.
 

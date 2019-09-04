@@ -1,5 +1,3 @@
-# adapated from https://github.com/dalab/hyperbolic_nn
-
 import torch as th
 import torch.nn as nn
 

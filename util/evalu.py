@@ -6,8 +6,6 @@ import torch as th
 import pandas as pd
 from tqdm import tqdm
 
-from params import *
-
 
 def precision_k(pred, label, k=[1, 3, 5]):
     batch_size = pred.shape[0]
@@ -28,7 +26,7 @@ def ndcg_k(pred, label, k=[1, 3, 5]):
     ndcg = []
     for _k in k:
         score = 0
-        rank = th.log2(th.arange(2, 2 + _k, dtype=default_dtype, device=cuda_device))
+        rank = th.log2(th.arange(2, 2 + _k, dtype=label.dtype, device=label.device))
         for i in range(batch_size):
             l = label[i, pred[i, :_k]]
             n = l.sum().item()
@@ -37,7 +35,7 @@ def ndcg_k(pred, label, k=[1, 3, 5]):
             
             dcg = (l/rank).sum().item()
             label_count = label[i].sum().item()
-            norm = 1 / th.log2(th.arange(2, 2 + min(_k, label_count), dtype=default_dtype))
+            norm = 1 / th.log2(th.arange(2, 2 + min(_k, label_count), dtype=label.dtype))
             norm = norm.sum().item()
             score += dcg/norm
             
@@ -46,7 +44,10 @@ def ndcg_k(pred, label, k=[1, 3, 5]):
     return ndcg
 
 
-def evaluate(net, test_data_loader):
+def evaluate(net, if_log=False, test_data_loader=None, data_path='./data/sample', test_batch_size=50, word_num=500):
+    if(test_data_loader == None):
+        test_data_loader = load_test_data(data_path, test_batch_size, word_num)
+    
     p1, p3, p5 = 0, 0, 0
     ndcg1, ndcg3, ndcg5 = 0, 0, 0
     
@@ -84,5 +85,4 @@ def evaluate(net, test_data_loader):
     if(if_log):
         log_columns = ['P@1', 'P@3', 'P@5', 'nDCGP@1', 'nDCG@3', 'nDCG@5']
         log = pd.DataFrame([[p1, p3, p5, ndcg1, ndcg3, ndcg5]], columns=log_columns)
-        log.to_csv('./log/result-dim-' + str(embed_dim) + '-' + str(datetime.now()) + '.csv', 
-                   encoding='utf-8', index=False)
+        log.to_csv('./log/result-' + str(datetime.now()) + '.csv', encoding='utf-8', index=False)
